@@ -19,7 +19,7 @@ def crawing(graph, cowbieNTUST_id, args):
                 if ('comments' in post):
                     for cmts in post['comments']['data']:
                         myCMTS = re.sub(pattent, '', cmts['message'])
-                        comments.append({ 'Author': {'id':cmts['from']['id'], 'name':cmts['from']['name'] }, 'msg':myCMTS, 'like_count': cmts['like_count'], 'Time': cmts['created_time']})
+                        comments.append({ 'id':cmts['id'] ,'Author': {'id':cmts['from']['id'], 'name':cmts['from']['name'] }, 'msg':myCMTS, 'like_count': cmts['like_count'], 'Time': cmts['created_time']})
                 
                 if ('likes' in post):
                     messages.append({'id':post['id'], 'Time':post['created_time'], 'msg':myMSG, 'likes':post['likes']['data'], 'total_likes':len(post['likes']['data']), 'comments': comments})
@@ -40,7 +40,7 @@ def crawing(graph, cowbieNTUST_id, args):
 if __name__ == "__main__":
     out = open('hateNTUST.txt', 'w')
     cowbeiList = []
-    TOKEN = 'CAACEdEose0cBAER5blWimWBe2L7UJQLEvsFdQEwKur3icwQUB8OhCa60v63wnwa3rrHGBOK4ZBCSmiewE2IjYRKAJFIZAMKCTbJpVC9N5QF7gzL4exvo2n1QA1px7Nuli3yTymIos74A7dJa9TwR60sBWXE5gTBZCLZA7KZC2fbg2oD1UL6RRUNNEMSdCP6cZD'
+    TOKEN = 'CAACEdEose0cBADlaf7aq3NwPCfwZAcMZC7FlvDBscdeluZBcYK6i14jZCGDZAlAcyZCVgPsKFh80SbdlsJX5buLOkcDqRAZCrXVF70PgloT0ISqifh6QYxHyk0rkiyNtJFAyBo6lB2sLP3uTZCjCMoXuvmqgz3mnzWOPMeEr1ZCiwB2HqVj2jgiix9KL0qsuqc68ZD'
     graph = facebook.GraphAPI(TOKEN)
       
     cowbieNTUST_id = '671080219594594/posts';
