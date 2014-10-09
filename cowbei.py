@@ -40,10 +40,10 @@ def crawing(graph, cowbieNTUST_id, args):
 if __name__ == "__main__":
     out = open('hateNTUST.txt', 'w')
     cowbeiList = []
-    TOKEN = 'CAACEdEose0cBADlaf7aq3NwPCfwZAcMZC7FlvDBscdeluZBcYK6i14jZCGDZAlAcyZCVgPsKFh80SbdlsJX5buLOkcDqRAZCrXVF70PgloT0ISqifh6QYxHyk0rkiyNtJFAyBo6lB2sLP3uTZCjCMoXuvmqgz3mnzWOPMeEr1ZCiwB2HqVj2jgiix9KL0qsuqc68ZD'
+    TOKEN='CAACEdEose0cBAMGSWnJO92WreoNyooZAE5APuc94DJzjMKjtqLE9qqXLLuMuTCx8lLZAlU8dvukZAbqTopvwd6ni2mZBglo0FeIe6oT6cZCZAZAqFnKdlMMvyxlCl68ZAri2ajAhqP9M8pfrcLDJgQYTabIN8rh0YLiyM2k4C9RqWovj9MGaqcZAdteX6Uh6sV07vbIjDFMZAoyDbDcNudZB0tOfPLGkv61F5cZD'
     graph = facebook.GraphAPI(TOKEN)
       
-    cowbieNTUST_id = '671080219594594/posts';
+    cowbieNTUST_id = '330410723750844/posts';
 
     args = {'fields' : 'id,message,likes,comments', 'limit' : 200, 'until' : ''}
     
