@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from pymongo import MongoClient
+
 import facebook
 import re
 import json
@@ -56,10 +58,10 @@ def LikeCrawler(graph, postid):
     return likelist, total
 
 
-def crawing(graph, Fans_id, args):
+def crawing(graph, Fans_id, args, collections):
     pattent = re.compile(u'[\U00010000-\U0010ffff]')
     next_id = ""
-    messages = []
+    counter = 0
     posts = graph.get_object(Fans_id + '/posts', **args)
 
     next_id = "nextpage"
@@ -67,12 +69,21 @@ def crawing(graph, Fans_id, args):
     while (next_id != ""):
         # iterate posts
         for post in posts['data']:
+            print counter
+            counter +=1
+
             post_id = post['id']
-            # member of like
-            likelist, likeCount = LikeCrawler(graph, post_id)
-            commentlist = CommentCrawler(graph, post_id)
-            messages.append({'id':post_id, 'like_count': likeCount, 'time':post['created_time'], 'likes':likelist, 'comments':commentlist})
-        next_id = ''
+            # Check the post if it exists
+            if collections.find_one({'id':post_id}):
+                continue
+
+            like_list, likeCount = LikeCrawler(graph, post_id)
+            comment_list = CommentCrawler(graph, post_id)
+
+            msg = {'id':post_id, 'like_count': likeCount, 'time':post['created_time'], 'likes':like_list, 'comments':comment_list}
+
+            collections.insert(msg)
+
         if ('paging' in posts):
             next_id = re.search('[0-9]+$', posts['paging']['next']).group(0)
         else:
@@ -82,21 +93,24 @@ def crawing(graph, Fans_id, args):
         args['until'] = next_id
         posts = graph.get_object(Fans_id + '/posts', **args)
 
-    return messages
+    return counter
 
 if __name__ == "__main__":
-    out = open('Fans.txt', 'w')
-
-    Token = 'CAACEdEose0cBANKH2QjO5gwXVYqikntPfPNH4F6iY7ZC8nLsIqsiPItZCytVWWclhOot6y3hXJIdLmOb2oVVawaPe3mZBRxo6kIBLDZCsBTkZBPo1mXzeevb0n4BrpNQdCCHqlG7VNWKF36HSTR8j2LPoCNp2ZCqbZBrSZAl0gBu51pGcjEcs1K3jIgwXNnW92rqRbMQW8RvXnU7a08JaIfJfW49qb49bkYZD'
+    Token = 'CAACEdEose0cBALy3kQG2OJE6MQGZCOgvzH3k8ic2ZCSm30OnMCIwHcbjdNtBh9ei8sIZCnABEhLpkBqFuLq20eja9ZBxvEWfVB7qagZAuZB6Aw2P2roxKtPaRUo4zyWSYA0HyGczv0ZCkbMoVALilrKZCSpmeT4ZAotsL2v9sJNYcKNSEsZAEdefxZBdIBbDrMpjZBFZCEZBdQzyVYpQOHjeF0h6qfp2LeN9xzZCUIZD'
 
     graph = facebook.GraphAPI(Token)
 
-    #Fans_id = '544241848968882'
-    Fans_id = '136845026417486'
-    #Post_id = '544241848968882_810446749015056'
+    collection = MongoClient().facebook_fans_db.duncan
 
-    args = {'fields' : 'id, message, likes, comments', 'limit' : 5, 'until' : ''}
+    if collection:
+        print 'Database Online'
 
-    messages = crawing(graph, Fans_id, args)
 
-    out.write(json.dumps(messages, ensure_ascii=False, indent=2).encode("utf8"))
+    Fans_id = '544241848968882'
+    #Fans_id = '136845026417486'
+
+    args = {'fields' : 'id, message, likes, comments', 'limit' : 50, 'until' : ''}
+
+    post_count = crawing(graph, Fans_id, args, collection)
+
+    #out.write(json.dumps(messages, ensure_ascii=False, indent=2).encode("utf8"))
