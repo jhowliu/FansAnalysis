@@ -2,14 +2,14 @@
 from pymongo import MongoClient
 
 import facebook
-import re
 import json
+import time
 
 
 def CommentCrawler(graph, postid):
     total = 0
     commentlist = []
-    args = {'fields': 'like_count, from, message, id, created_time, attachment', 'limit':50, 'after':''}
+    args = {'fields': 'like_count, from, message, id, created_time, attachment', 'limit':500, 'after':''}
 
     COMMENTS = graph.get_object(postid + '/comments', **args)
 
@@ -26,15 +26,16 @@ def CommentCrawler(graph, postid):
             break
 
         args['after'] = next_id
+        time.sleep(2.5)
         COMMENTS = graph.get_object(postid + '/comments', **args)
-
+    
     print "Comments: " + str(total)
     return commentlist
 
 def LikeCrawler(graph, postid):
     total = 0
     likelist = []
-    args = {'limit':1000, 'after':'' }
+    args = {'limit':10000, 'after':'' }
 
     LIKES = graph.get_object(postid + '/likes', **args)
 
@@ -51,6 +52,7 @@ def LikeCrawler(graph, postid):
             break
 
         args['after'] = next_id
+        time.sleep(2.5)
         LIKES = graph.get_object(postid + '/likes', **args)
 
     print "Likes: " + str(total)
@@ -59,7 +61,6 @@ def LikeCrawler(graph, postid):
 
 
 def crawing(graph, Fans_id, args, collections):
-    pattent = re.compile(u'[\U00010000-\U0010ffff]')
     next_id = ""
     counter = 0
     posts = graph.get_object(Fans_id + '/posts', **args)
@@ -77,7 +78,9 @@ def crawing(graph, Fans_id, args, collections):
             if collections.find_one({'id':post_id}):
                 continue
 
+            time.sleep(2.5)
             like_list, likeCount = LikeCrawler(graph, post_id)
+            time.sleep(2.5)
             comment_list = CommentCrawler(graph, post_id)
 
             msg = {'id':post_id, 'like_count': likeCount, 'time':post['created_time'], 'likes':like_list, 'comments':comment_list}
@@ -91,16 +94,16 @@ def crawing(graph, Fans_id, args, collections):
 
         print next_id
         args['until'] = next_id
+        time.sleep(2.5)
         posts = graph.get_object(Fans_id + '/posts', **args)
 
     return counter
 
 if __name__ == "__main__":
-    Token = 'CAACEdEose0cBALy3kQG2OJE6MQGZCOgvzH3k8ic2ZCSm30OnMCIwHcbjdNtBh9ei8sIZCnABEhLpkBqFuLq20eja9ZBxvEWfVB7qagZAuZB6Aw2P2roxKtPaRUo4zyWSYA0HyGczv0ZCkbMoVALilrKZCSpmeT4ZAotsL2v9sJNYcKNSEsZAEdefxZBdIBbDrMpjZBFZCEZBdQzyVYpQOHjeF0h6qfp2LeN9xzZCUIZD'
-
+    Token = 'CAALtQOVQBRgBANiDMDoaDVauKxheRbenFkSUK8PJLjdE39CFu3dCLEv4M7SJSGfVZCZAa6EhIYZCeXC2UZCvCiQQpVt72bmMhmvmENF0dC9WQRA2dpYbv6mcRoZCXYo8IsjozTYoSCsw1VDZCoTHAqAbJX2XupZBNY0nNUuC9sDmr5pNO0gARp2VjJJFXEKjYS3VZAQ116e4lb3dgDvgiOjG'
     graph = facebook.GraphAPI(Token)
 
-    collection = MongoClient().facebook_fans_db.duncan
+    collection = MongoClient().facebook_fans_db.KPP
 
     if collection:
         print 'Database Online'
