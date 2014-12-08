@@ -4,7 +4,8 @@ from pymongo import MongoClient
 import facebook
 import json
 import time
-
+import sys
+import re
 
 def CommentCrawler(graph, postid):
     total = 0
@@ -28,7 +29,7 @@ def CommentCrawler(graph, postid):
         args['after'] = next_id
         time.sleep(2.5)
         COMMENTS = graph.get_object(postid + '/comments', **args)
-    
+
     print "Comments: " + str(total)
     return commentlist
 
@@ -78,12 +79,14 @@ def crawing(graph, Fans_id, args, collections):
             if collections.find_one({'id':post_id}):
                 continue
 
-            time.sleep(2.5)
-            like_list, likeCount = LikeCrawler(graph, post_id)
-            time.sleep(2.5)
-            comment_list = CommentCrawler(graph, post_id)
+#            like_list, likeCount = LikeCrawler(graph, post_id)
+#            comment_list = CommentCrawler(graph, post_id)
 
-            msg = {'id':post_id, 'like_count': likeCount, 'time':post['created_time'], 'likes':like_list, 'comments':comment_list}
+            if ('message' in post):
+                msg = {'msg':post['message'], 'id':post_id, 'time':post['created_time']}
+            else:
+                msg = {'id':post_id, 'time':post['created_time']}
+
 
             collections.insert(msg)
 
@@ -94,23 +97,23 @@ def crawing(graph, Fans_id, args, collections):
 
         print next_id
         args['until'] = next_id
-        time.sleep(2.5)
         posts = graph.get_object(Fans_id + '/posts', **args)
 
     return counter
 
 if __name__ == "__main__":
-    Token = 'CAALtQOVQBRgBANiDMDoaDVauKxheRbenFkSUK8PJLjdE39CFu3dCLEv4M7SJSGfVZCZAa6EhIYZCeXC2UZCvCiQQpVt72bmMhmvmENF0dC9WQRA2dpYbv6mcRoZCXYo8IsjozTYoSCsw1VDZCoTHAqAbJX2XupZBNY0nNUuC9sDmr5pNO0gARp2VjJJFXEKjYS3VZAQ116e4lb3dgDvgiOjG'
+    if len(sys.argv) < 2:
+        print "python Crawler.py <Token>"
+    Token = sys.argv[1]
     graph = facebook.GraphAPI(Token)
 
-    collection = MongoClient().facebook_fans_db.KPP
+    collection = MongoClient().facebook_fans_db.KP_Msg
 
     if collection:
         print 'Database Online'
 
 
-    Fans_id = '544241848968882'
-    #Fans_id = '136845026417486'
+    Fans_id = '136845026417486'
 
     args = {'fields' : 'id, message, likes, comments', 'limit' : 50, 'until' : ''}
 
