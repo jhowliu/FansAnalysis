@@ -32,6 +32,21 @@ def filterPK(label):
 
     return pig, kp
 
+def getClusterPost(result, user, label, threshold):
+    data = []
+    label = np.array(label)
+    for t in result:
+        tmp = []
+        for uid in t[1:len(t)]:
+            tmp.append(user[uid])
+
+        tmp = np.array(tmp)
+        tmp = label[np.sum(tmp) > threshold]
+
+        data.append(tmp.tolist())
+
+    return data
+
 if __name__ == '__main__':
     if len(sys.argv) < 3:
         print "Usage: python dataAnalysis.py <UserMatrix> <ClusteringResult>"
