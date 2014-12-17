@@ -41,7 +41,8 @@ def getClusterPost(result, user, label, threshold):
             tmp.append(user[uid])
 
         tmp = np.array(tmp)
-        tmp = label[np.sum(tmp) > threshold]
+        # 0 is sum of column
+        tmp = label[np.sum(tmp, 0) > threshold]
 
         data.append(tmp.tolist())
 
